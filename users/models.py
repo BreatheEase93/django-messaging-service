@@ -1,3 +1,20 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# Create your models here.
+
+class CustomUser(AbstractUser):
+    """Стандартный класс пользователя"""
+
+    email = models.EmailField(unique=True)
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+    country = models.CharField(
+        max_length=50, blank=True, null=True, verbose_name="Страна"
+    )
+
+    verification_token = models.CharField(max_length=100, blank=True, null=True)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
+
+    def __str__(self):
+        return self.email

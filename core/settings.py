@@ -3,6 +3,8 @@ from pathlib import Path
 
 import environ
 
+AUTH_USER_MODEL = "users.CustomUser"
+
 # Инициализируем environ
 env = environ.Env(
     # задаем значения по умолчанию, если переменной нет в .env
@@ -31,6 +33,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "users",
 ]
 
 MIDDLEWARE = [
