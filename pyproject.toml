@@ -6,9 +6,11 @@ authors = [
     {name = "Dmitry globa",email = "dima.globa2015@yandex.ru"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
-    "django (>=6.0.5,<7.0.0)"
+    "django (>=6.0.5,<7.0.0)",
+    "psycopg2-binary (>=2.9.12,<3.0.0)",
+    "django-environ (>=0.13.0,<0.14.0)"
 ]
 
 
