@@ -22,5 +22,27 @@ build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
-    "ruff (>=0.15.13,<0.16.0)"
+    "ruff (>=0.15.13,<0.16.0)",
+    "mypy (>=2.1.0,<3.0.0)",
+    "django-stubs (>=6.0.4,<7.0.0)"
 ]
+
+[tool.mypy]
+# Подключаем плагин для Django
+plugins = ["mypy_django_plugin.main"]
+
+# Игнорируем отсутствие аннотаций в сторонних библиотеках
+ignore_missing_imports = true
+
+# Включаем строгую проверку по вкусу
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+# Настройки плагина django-stubs
+[[tool.mypy.overrides]]
+module = "environ.*"
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "core.settings"
