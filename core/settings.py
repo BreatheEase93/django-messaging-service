@@ -12,18 +12,27 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+import environ
+import os
+
+# Инициализируем environ
+env = environ.Env(
+    # задаем значения по умолчанию, если переменной нет в .env
+    DEBUG=(bool, False)
+)
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Читаем файл .env
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-b39e-q213k)+54#j+2+@z1c3(t99^bnxq09knowh+)7ahl7twc'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -72,12 +81,21 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+SECRET_KEY = env('SECRET_KEY')
+DEBUG = env('DEBUG')
+
+# Настройка базы данных PostgreSQL из .env
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': env('DATABASE_HOST'),
+        'PORT': env('DATABASE_PORT'),
     }
 }
+
 
 
 # Password validation
@@ -110,8 +128,28 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
+# Настройки статических файлов (CSS, JavaScript, Images для дизайна)
 STATIC_URL = 'static/'
+# Папка, куда Django будет собирать всю статику проекта при деплое
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Папки, где вы будете хранить локальные CSS/JS файлы вашего проекта
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# Настройки медиа-файлов (Загрузки пользователей: аватарки, картинки в чатах)
+MEDIA_URL = 'media/'
+# Физическая папка на диске, куда будут сохраняться файлы
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+
+# Настройки отправки почты (Email settings)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env.int('EMAIL_PORT')  
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL') 
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+
