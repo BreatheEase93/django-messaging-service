@@ -6,12 +6,43 @@ authors = [
     {name = "Dmitry globa",email = "dima.globa2015@yandex.ru"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
-    "django (>=6.0.5,<7.0.0)"
+    "django (>=6.0.5,<7.0.0)",
+    "psycopg2-binary (>=2.9.12,<3.0.0)",
+    "django-environ (>=0.13.0,<0.14.0)",
+    "redis (>=7.4.0,<8.0.0)",
+    "pillow (>=12.2.0,<13.0.0)"
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.15.13,<0.16.0)",
+    "mypy (>=2.1.0,<3.0.0)",
+    "django-stubs (>=6.0.4,<7.0.0)"
+]
+
+[tool.mypy]
+# Подключаем плагин для Django
+plugins = ["mypy_django_plugin.main"]
+
+# Игнорируем отсутствие аннотаций в сторонних библиотеках
+ignore_missing_imports = true
+
+# Включаем строгую проверку по вкусу
+strict_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+# Настройки плагина django-stubs
+[[tool.mypy.overrides]]
+module = "environ.*"
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "core.settings"
