@@ -143,7 +143,7 @@ EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
 
-# Настройка кэширования через встроенный драйвер Django (Пункт 10 ТЗ)
+# Настройка кэширования через встроенный драйвер Django
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
