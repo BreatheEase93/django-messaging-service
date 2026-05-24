@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 
 
@@ -13,6 +13,7 @@ class CustomUser(AbstractUser):
     country: models.CharField = models.CharField(
         max_length=50, blank=True, null=True, verbose_name="Страна"
     )
+    objects = UserManager()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
