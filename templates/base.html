@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Сервис рассылок{% endblock %}</title>
+    <!-- Современный темный Bootstrap 5 -->
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; min-height: 100vh; display: flex; flex-direction: column; }
+        .footer { margin-top: auto; }
+    </style>
+</head>
+<body>
+
+    <!-- Навигационная панель (Шапка сайта) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="{% url 'dashboard:index' %}">✉️ MessagingService</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:index' %}">Главная</a></li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'mailings:mailing_list' %}">Рассылки</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'mailings:message_list' %}">Шаблоны писем</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'clients:list' %}">Клиенты</a></li>
+                    {% endif %}
+                </ul>
+                <div class="d-flex align-items-center">
+                    {% if user.is_authenticated %}
+                        <span class="text-light me-3 small">{{ user.email }}</span>
+                        <a href="{% url 'users:profile' %}" class="btn btn-sm btn-outline-light me-2">Профиль</a>
+                        <!-- Кнопка Выхода строго через POST-форму для Django 5+ -->
+                        <form action="{% url 'users:logout' %}" method="post" class="m-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">Выйти</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'users:login' %}" class="btn btn-sm btn-outline-light me-2">Войти</a>
+                        <a href="{% url 'users:register' %}" class="btn btn-sm btn-primary">Регистрация</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Блок для всплывающих уведомлений (Django Messages) -->
+    <div class="container mt-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Основной контент страницы -->
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Подвал сайта -->
+    <footer class="footer bg-dark text-light py-3 border-top border-secondary">
+        <div class="container text-center">
+            <span class="text-muted small">© 2026 django-messaging-service. Все права защищены.</span>
+        </div>
+    </footer>
+
+    <!-- Скрипты Bootstrap -->
+    <script src="https://jsdelivr.net"></script>
+</body>
+</html>
