@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная — Панель управления{% endblock %}
+
+{% block content %}
+<!-- Приветственный баннер -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-dark text-white border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-body p-5 bg-gradient">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-4 fw-bold mb-2">Добро пожаловать в MessagingService!</h1>
+                        <p class="lead text-light-50 mb-0">Управляйте базой клиентов, создавайте шаблоны писем и запускайте автоматические или ручные рассылки в один клик.</p>
+                    </div>
+                    <div class="col-md-4 text-end d-none d-md-block" style="font-size: 5rem;">
+                        📊
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Сетка с карточками статистики -->
+<div class="row g-4 mb-5">
+    
+    <!-- Карточка 1: Всего рассылок -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body text-center py-4">
+                <div class="text-primary mb-2" style="font-size: 2rem;">✉️</div>
+                <h6 class="card-title text-muted text-uppercase fw-semibold small mb-2">Всего рассылок</h6>
+                <p class="display-4 fw-bold text-primary my-2">{{ total_mailings }}</p>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3">В базе данных</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Карточка 2: Активные рассылки -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body text-center py-4">
+                <div class="text-success mb-2" style="font-size: 2rem;">⚡</div>
+                <h6 class="card-title text-muted text-uppercase fw-semibold small mb-2">Активные рассылки</h6>
+                <p class="display-4 fw-bold text-success my-2">{{ active_mailings }}</p>
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Статус: Запущена</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Карточка 3: Уникальные клиенты -->
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm rounded-3">
+            <div class="card-body text-center py-4">
+                <div class="text-info mb-2" style="font-size: 2rem;">👥</div>
+                <h6 class="card-title text-muted text-uppercase fw-semibold small mb-2">Уникальные получатели</h6>
+                <p class="display-4 fw-bold text-info my-2">{{ total_clients }}</p>
+                <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3">Всего в системе</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Быстрые действия -->
+{% if not user.is_authenticated %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <div class="alert alert-warning border-0 shadow-sm p-4 rounded-3" role="alert">
+            <h5 class="fw-bold mb-2">Для начала работы необходимо авторизоваться</h5>
+            <p class="text-muted small mb-3">Создание рассылок и управление получателями доступны только зарегистрированным пользователям.</p>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{% url 'users:login' %}" class="btn btn-warning px-4 fw-semibold">Войти</a>
+                <a href="{% url 'users:register' %}" class="btn btn-outline-dark px-4">Регистрация</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -13,10 +13,9 @@ class DashboardView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Пытаемся достать готовую статистику из кэша Redis
         stats = cache.get("dashboard_stats")
 
-        # Если в кэше ничего нет (он устарел или это первый запуск) — считаем из БД
+        # Если в кэше ничего нет или он устарел илиб это первый запуск — считаем из БД
         if not stats:
             stats = {
                 "total_mailings": Mailing.objects.count(),

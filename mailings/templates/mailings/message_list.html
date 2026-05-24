@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Шаблоны сообщений{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark m-0">📝 Шаблоны писем</h2>
+    <a href="{% url 'mailings:message_create' %}" class="btn btn-primary">+ Новый шаблон</a>
+</div>
+
+<div class="row g-4">
+    {% for message in messages %}
+    <div class="col-md-6">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body p-4 d-flex flex-column">
+                <h4 class="fw-bold text-dark text-truncate">{{ message.subject }}</h4>
+                <p class="text-muted small mb-3">Автор: {{ message.owner.email }}</p>
+                <p class="text-secondary text-truncate flex-grow-1" style="max-height: 50px;">{{ message.body }}</p>
+                <div class="d-flex justify-content-end border-top pt-3 mt-3">
+                    <a href="{% url 'mailings:message_detail' message.pk %}" class="btn btn-sm btn-outline-dark me-2">Просмотреть</a>
+                    <a href="{% url 'mailings:message_update' message.pk %}" class="btn btn-sm btn-outline-primary me-2">✏️</a>
+                    <a href="{% url 'mailings:message_delete' message.pk %}" class="btn btn-sm btn-outline-danger">🗑️</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5 text-muted">
+        <p class="fs-5">У вас пока нет созданных шаблонов писем.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

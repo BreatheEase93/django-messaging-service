@@ -71,20 +71,23 @@ class Mailing(models.Model):
     def __str__(self) -> str:
         return f"Рассылка #{self.pk} (Тема: {self.message.subject})"
 
-    def update_status(self) -> None:
-        """Динамически проверяет текущее время и обновляет статус."""
-        now = timezone.now()
+        def update_status(self) -> None:
+            """Динамически проверяет текущее время и обновляет статус напрямую в БД."""
+            now = timezone.now()
 
-        if now < self.start_time:
-            calculated_status = "created"
-        elif self.start_time <= now <= self.end_time:
-            calculated_status = "started"
-        else:
-            calculated_status = "completed"
+            if now < self.start_time:
+                calculated_status = "created"
+            elif self.start_time <= now <= self.end_time:
+                calculated_status = "started"
+            else:
+                calculated_status = "completed"
 
-        if self.status != calculated_status:
-            self.status = calculated_status
-            self.save(update_fields=["status"])
+            if self.status != calculated_status:
+                # Обновляем поле в базе данных напрямую в один быстрый SQL-запрос
+                Mailing.objects.filter(pk=self.pk).update(status=calculated_status)
+                self.status = (
+                    calculated_status  # Обновляем статус в текущем объекте в памяти
+                )
 
     def clean(self) -> None:
         super().clean()
@@ -102,18 +105,21 @@ class Mailing(models.Model):
                 }
             )
 
-    def save(self, *args, **kwargs) -> None:
-        now = timezone.now()
+        def save(self, *args, **kwargs) -> None:
+            # Рассчитываем статус только при первом создании или обычном сохранении формы
+            now = timezone.now()
+            if now < self.start_time:
+                self.status = "created"
+            elif self.start_time <= now <= self.end_time:
+                self.status = "started"
+            else:
+                self.status = "completed"
 
-        if now < self.start_time:
-            self.status = "created"
-        elif self.start_time <= now <= self.end_time:
-            self.status = "started"
-        else:
-            self.status = "completed"
+            # full_clean вызываем только если мы НЕ обновляем конкретные поля программно
+            if not kwargs.get("update_fields"):
+                self.full_clean()
 
-        self.full_clean()
-        super().save(*args, **kwargs)
+            super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Рассылка"
