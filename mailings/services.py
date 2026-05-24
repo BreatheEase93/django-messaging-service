@@ -7,11 +7,12 @@ from .models import Mailing, MailingAttempt
 
 
 def send_mailing(mailing: Mailing) -> tuple[bool, str]:
-    """Выполняет отправку конкретной рассылки всем связанным получателям."""
+    """
+    Выполняет отправку рассылки получателям с batch-сохранением логов попыток.
+    """
     now = timezone.now()
 
-    # Шаг 1. Инициация и проверка времени
-    # Обновляем статус рассылки на актуальный перед проверкой
+    # Валидация входных данных по времени (Критерий ТЗ)
     mailing.update_status()
 
     if not (mailing.start_time <= now <= mailing.end_time):
@@ -29,9 +30,11 @@ def send_mailing(mailing: Mailing) -> tuple[bool, str]:
 
     recipient_emails = [client.email for client in recipients]
 
-    # Шаг 3. Отправка писем через send_mail() с логированием
+    # Список, в который мы соберем объекты логов для batch-сохранения
+    attempts_to_create = []
+
     try:
-        # Django send_mail отправляет письмо списку адресатов
+        # Отправка писем
         send_mail(
             subject=mailing.message.subject,
             message=mailing.message.body,
@@ -40,26 +43,43 @@ def send_mailing(mailing: Mailing) -> tuple[bool, str]:
             fail_silently=False,
         )
 
-        # Если всё прошло успешно, создаем лог 'success'
-        MailingAttempt.objects.create(
-            status="success",
-            server_response="Письма успешно отправлены всем получателям.",
-            mailing=mailing,
-        )
+        # Для каждого получателя формируем лог успеха в памяти (Критерий ТЗ)
+        for client in recipients:
+            attempts_to_create.append(
+                MailingAttempt(
+                    status="success",
+                    server_response=f"Письмо успешно отправлено на адрес {client.email}.",
+                    mailing=mailing,
+                )
+            )
+
+        # ЗАПИСЬ ЧЕРЕЗ BATCH (bulk_create) — отправляем все логи одним SQL-запросом
+        MailingAttempt.objects.bulk_create(attempts_to_create)
         return True, "Рассылка успешно выполнена."
 
     except smtplib.SMTPException as e:
-        # Перехватываем специфичные ошибки почтового сервера (неверный пароль приложения, блокировка)
         error_message = f"Ошибка SMTP сервера: {str(e)}"
-        MailingAttempt.objects.create(
-            status="failed", server_response=error_message, mailing=mailing
-        )
+
+        # В случае ошибки также формируем batch логов для каждого получателя
+        for client in recipients:
+            attempts_to_create.append(
+                MailingAttempt(
+                    status="failed",
+                    server_response=f"Сбой доставки на {client.email}. {error_message}",
+                    mailing=mailing,
+                )
+            )
+
+        MailingAttempt.objects.bulk_create(attempts_to_create)
         return False, error_message
 
     except Exception as e:
-        # Перехватываем любые другие неожиданные ошибки (например, упал интернет)
-        error_message = f"Непредвиденная ошибка при отправке: {str(e)}"
-        MailingAttempt.objects.create(
-            status="failed", server_response=error_message, mailing=mailing
-        )
+        error_message = f"Непредвиденная ошибка: {str(e)}"
+        for client in recipients:
+            attempts_to_create.append(
+                MailingAttempt(
+                    status="failed", server_response=error_message, mailing=mailing
+                )
+            )
+        MailingAttempt.objects.bulk_create(attempts_to_create)
         return False, error_message
