@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "users",
     "clients",
     "mailings",
+    "dashboard",
 ]
 
 MIDDLEWARE = [
@@ -140,3 +141,12 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+
+
+# Настройка кэширования через встроенный драйвер Django (Пункт 10 ТЗ)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
+}
