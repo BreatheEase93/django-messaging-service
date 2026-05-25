@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ message.subject }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 p-4">
+            <span class="text-muted small font-monospace">Шаблон сообщения #{{ message.pk }}</span>
+            <h2 class="fw-bold text-dark mt-1 mb-3">{{ message.subject }}</h2>
+            <hr>
+            <h5 class="fw-bold text-secondary mb-2">Содержимое (Тело письма):</h5>
+            <div class="p-3 bg-light rounded text-dark fs-5 mb-4" style="white-space: pre-wrap;">{{ message.body }}</div>
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'mailings:message_list' %}" class="btn btn-light">🔙 К списку шаблонов</a>
+                <div>
+                    <a href="{% url 'mailings:message_update' message.pk %}" class="btn btn-primary me-2">✏️ Редактировать</a>
+                    <a href="{% url 'mailings:message_delete' message.pk %}" class="btn btn-danger">🗑️ Удалить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

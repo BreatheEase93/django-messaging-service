@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Рассылка #{{ mailing.pk }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <span class="text-muted small font-monospace">Рассылка #{{ mailing.pk }}</span>
+                    <h2 class="fw-bold text-dark mt-1">{{ mailing.message.subject }}</h2>
+                </div>
+                <!-- Кнопка ручного запуска рассылки по ТЗ -->
+                <form action="{% url 'mailings:mailing_start' mailing.pk %}" method="post" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success fw-bold shadow-sm">🚀 Запустить рассылку вручную</button>
+                </form>
+            </div>
+            
+            <hr class="text-muted">
+            <h5 class="fw-bold">Текст сообщения:</h5>
+            <div class="p-3 bg-light rounded text-secondary mb-4">{{ mailing.message.body|linebreaks }}</div>
+
+            <h5 class="fw-bold mb-3">Список получателей:</h5>
+            <div class="list-group list-group-flush border rounded">
+                {% for recipient in mailing.recipients.all %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold text-dark">{{ recipient.name }}</span>
+                        <span class="text-muted small">{{ recipient.email }}</span>
+                    </div>
+                {% empty %}
+                    <div class="list-group-item text-center text-muted py-3">Получатели не выбраны</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Правая колонка с логами и параметрами -->
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 p-4 mb-4 bg-dark text-light">
+            <h5 class="fw-bold mb-3 text-primary">Параметры запуска</h5>
+            <p class="mb-2"><strong>Старт:</strong> <span class="text-light-50">{{ mailing.start_time|date:"d.m.Y H:i" }}</span></p>
+            <p class="mb-3"><strong>Финиш:</strong> <span class="text-light-50">{{ mailing.end_time|date:"d.m.Y H:i" }}</span></p>
+            <div class="d-grid">
+                <a href="{% url 'mailings:mailing_update' mailing.pk %}" class="btn btn-sm btn-outline-primary mb-2">Редактировать параметры</a>
+                <a href="{% url 'mailings:mailing_list' %}" class="btn btn-sm btn-secondary">Назад к списку</a>
+            </div>
+        </div>
+
+        <!-- Вывод истории попыток (Пункт 5 ТЗ) -->
+        <div class="card shadow-sm border-0 p-4">
+            <h5 class="fw-bold mb-3 text-dark">История попыток:</h5>
+            <div style="max-height: 300px; overflow-y: auto;">
+                {% for attempt in mailing.attempts.all %}
+                    <div class="border-start border-3 {% if attempt.status == 'success' %}border-success{% else %}border-danger{% endif %} ps-3 mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold text-dark">{% if attempt.status == 'success' %}Успешно{% else %}Ошибка{% endif %}</span>
+                            <span class="text-muted small">{{ attempt.attempt_time|date:"H:i:s d.m" }}</span>
+                        </div>
+                        <p class="text-muted small mb-0 text-truncate" title="{{ attempt.server_response }}">{{ attempt.server_response }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-center text-muted py-3 mb-0">Попыток отправки ещё не зафиксировано.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
