@@ -30,6 +30,10 @@ class RegisterView(CreateView):
         # Превращаем его в абсолютную ссылку сайта
         absolute_url = self.request.build_absolute_uri(relative_url)
 
+        messages.info(
+            self.request, "На вашу почту отправлено письмо со ссылкой для активации."
+        )
+
         send_mail(
             subject="Подтверждение регистрации",
             message=f"Здравствуйте, {user.email}! Для завершения регистрации в сервисе рассылок перейдите по ссылке:\n{absolute_url}",
